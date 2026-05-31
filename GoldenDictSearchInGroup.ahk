@@ -1,5 +1,6 @@
 scriptDir := A_ScriptDir
 iniPath := scriptDir . "\GoldenDictSearchInGroup.ini"
+trayIcon := scriptDir . "\assets\icon.ico"
 
 if (!FileExist(iniPath)) {
     MsgBox, 0x10, Error, Configuration file not found:`n%iniPath%`n`nPlease ensure GoldenDictSearchInGroup.ini exists in the same folder.
@@ -37,6 +38,7 @@ Menu, Tray, Add, Suspend Hotkeys, SuspendHotkeys
 Menu, Tray, Add, Pause Script, PauseScript
 Menu, Tray, Add, Exit, ExitScript
 Menu, Tray, Tip, GoldenDict Search`n%primaryHotkey% = %primaryGroup%`n%secondaryHotkey% = %secondaryGroup%
+Menu, Tray, Icon, %trayIcon%
 
 Hotkey, %primaryHotkey%, SearchPrimary
 Hotkey, %secondaryHotkey%, SearchSecondary
