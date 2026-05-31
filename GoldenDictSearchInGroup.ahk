@@ -1,11 +1,8 @@
-; Search current clipboard text in GoldenDict
-; Authors: DeepSeek🧙‍♂️, GLM-5🧙‍♂️, scillidan🤡
-
 scriptDir := A_ScriptDir
-iniPath := scriptDir . "\goldendict_search_in_group.ini"
+iniPath := scriptDir . "\GoldenDictSearchInGroup.ini"
 
 if (!FileExist(iniPath)) {
-    MsgBox, 0x10, Error, Configuration file not found:`n%iniPath%`n`nPlease ensure goldendict_search_in_group.ini exists in the same folder.
+    MsgBox, 0x10, Error, Configuration file not found:`n%iniPath%`n`nPlease ensure GoldenDictSearchInGroup.ini exists in the same folder.
     ExitApp
 }
 
@@ -23,7 +20,7 @@ if (!InStr(gdExecutable, "\") && !InStr(gdExecutable, "/")) {
 }
 
 startupDir := A_StartMenu . "\Programs\Startup"
-shortcutPath := startupDir . "\goldendict_search.lnk"
+shortcutPath := startupDir . "\GoldenDict Search In Group.lnk"
 isStartup := FileExist(shortcutPath)
 
 Menu, Tray, NoStandard
