@@ -34,15 +34,15 @@ jobs:
       - name: Compile AHK to EXE
         run: |
           & "C:\Program Files\AutoHotkey\Compiler\Ahk2Exe.exe" `
-            /in "KeyboardSwitch.ahk" `
+            /in "GoldenDictSearchInGroup.ahk" `
             /icon "assets/icon.ico" `
-            /out "KeyboardSwitch.exe"
+            /out "GoldenDictSearchInGroup.exe"
 
       - name: ZIP
-        run: 7z a -tzip KeyboardSwitch.zip KeyboardSwitch.exe KeyboardSwitch.ini
+        run: 7z a -tzip GoldenDictSearchInGroup.zip GoldenDictSearchInGroup.exe GoldenDictSearchInGroup.ini
 
       - name: Generate SHA256 checksums
-        run: sha256sum KeyboardSwitch.zip > KeyboardSwitch.exe.sha256
+        run: sha256sum GoldenDictSearchInGroup.zip > GoldenDictSearchInGroup.exe.sha256
 
       - name: Release
         uses: softprops/action-gh-release@v3
@@ -50,4 +50,4 @@ jobs:
           tag_name: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref_name }}
           name: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref_name }}
           files: |
-            KeyboardSwitch.zip
+            GoldenDictSearchInGroup.zip
