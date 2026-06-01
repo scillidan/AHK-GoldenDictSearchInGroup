@@ -39,7 +39,7 @@ jobs:
             /out "GoldenDictSearchInGroup.exe"
 
       - name: ZIP
-        run: 7z a -tzip GoldenDictSearchInGroup.zip GoldenDictSearchInGroup.exe GoldenDictSearchInGroup.ini assets
+        run: 7z a -tzip GoldenDictSearchInGroup.zip GoldenDictSearchInGroup.exe GoldenDictSearchInGroup.ini assets/icon.ico
 
       - name: Generate SHA256 checksums
         run: sha256sum GoldenDictSearchInGroup.zip > GoldenDictSearchInGroup.exe.sha256
