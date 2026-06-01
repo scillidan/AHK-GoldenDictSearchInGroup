@@ -8,7 +8,7 @@ Search clipboard text across dictionary groups using GoldenDict.
 
 Authors: GLM-5🧙‍♂️, scillidan🤡.
 
-Icon picture is form [SimpleKeys](https://beamedeighth.itch.io/simplekeys-animated-pixel-keyboard-keys) by [beamedeighth](https://beamedeighth.itch.io/).
+The icon is from [SimpleKeys](https://beamedeighth.itch.io/simplekeys-animated-pixel-keyboard-keys) by [beamedeighth](https://beamedeighth.itch.io/).
 
 ## Usage
 
