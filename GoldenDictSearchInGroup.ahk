@@ -16,30 +16,9 @@ IniRead, gdExecutable, %iniPath%, GoldenDict, Executable, goldendict
 IniRead, defaultWindowMode, %iniPath%, GoldenDict, DefaultWindowMode, popup
 IniRead, noSelectionMsg, %iniPath%, Messages, NoSelectionMsg, No text copied. Please select the word to query first.
 
-hkToGroup := {}
 trayTipText := "GoldenDict Search"
 
-
-groupIndex := 1
-Loop {
-    currentGroupKey := "Group_" . groupIndex
-    IniRead, groupName, %iniPath%, Groups, %currentGroupKey%, __MISSING__
-    if (groupName == "__MISSING__" || groupName == "")
-        break
-
-    IniRead, hk, %iniPath%, Hotkeys, %currentGroupKey%, __MISSING__
-    IniRead, wMode, %iniPath%, WindowModes, %currentGroupKey%, %defaultWindowMode%
-
-    if (hk != "__MISSING__" && hk != "") {
-        Hotkey, %hk%, HandleGroupSearch
-        hkToGroup[hk] := groupName . "|" . wMode
-        trayTipText .= "`n" . hk . " = " . groupName
-    }
-    groupIndex++
-}
-
-
-IniRead, triggerKey, %iniPath%, SpecialHotkeys, TriggerKey, __MISSING__
+IniRead, triggerKey, %iniPath%, Hotkeys, TriggerKey, __MISSING__
 
 if (triggerKey != "__MISSING__" && triggerKey != "") {
     singleClickMap := {}
@@ -49,10 +28,10 @@ if (triggerKey != "__MISSING__" && triggerKey != "") {
     DblClickTime := 300
     letters := ""
 
-    IniRead, specialSection, %iniPath%, SpecialHotkeys
+    IniRead, hotkeysSection, %iniPath%, Hotkeys
 
-    if (specialSection != "ERROR") {
-        Loop, Parse, specialSection, `n, `r
+    if (hotkeysSection != "ERROR") {
+        Loop, Parse, hotkeysSection, `n, `r
         {
             if (A_LoopField == "")
                 continue
@@ -79,7 +58,7 @@ if (triggerKey != "__MISSING__" && triggerKey != "") {
         Loop, Parse, letters
         {
             hk := triggerKey . A_LoopField
-            Hotkey, %hk%, HandleSpecialTrigger
+            Hotkey, %hk%, HandleTrigger
         }
 
         trayTipText .= "`n[Prefix: " . triggerKey . "]"
@@ -150,14 +129,7 @@ ExitScript:
     ExitApp
 return
 
-HandleGroupSearch:
-    if (hkToGroup.HasKey(A_ThisHotkey)) {
-        data := StrSplit(hkToGroup[A_ThisHotkey], "|")
-        SearchInGoldenDict(data[1], data[2])
-    }
-return
-
-HandleSpecialTrigger:
+HandleTrigger:
     global triggerKey, DblClickTime, lastPressTime, pendingSingleLetter
     global singleClickMap, dblClickMap
 
