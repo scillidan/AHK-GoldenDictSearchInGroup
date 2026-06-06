@@ -90,8 +90,8 @@ if (isStartup) {
 } else {
     Menu, Tray, Add, Start with Windows, ToggleStartup
 }
-Menu, Tray, Add, Suspend Hotkeys, SuspendHotkeys
-Menu, Tray, Add, Pause Script, PauseScript
+Menu, Tray, Add, Edit Config, EditConfig
+Menu, Tray, Add, Reload, ReloadApp
 Menu, Tray, Add, Exit, ExitScript
 Menu, Tray, Tip, %trayTipText%
 
@@ -125,6 +125,19 @@ PauseScript:
     else
         Menu, Tray, Uncheck, Pause Script
 return
+EditConfig:
+    Run, edit "%iniPath%"
+return
+
+ReloadApp:
+    TrayTip, GoldenDict Search In Group, Config reloaded, 2, 1
+    SetTimer, DoReload, -500
+return
+
+DoReload:
+    Reload
+return
+
 ExitScript:
     ExitApp
 return
