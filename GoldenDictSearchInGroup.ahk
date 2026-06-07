@@ -18,63 +18,42 @@ IniRead, noSelectionMsg, %iniPath%, Messages, NoSelectionMsg, No text copied. Pl
 
 trayTipText := "GoldenDict Search"
 
-IniRead, triggerKey, %iniPath%, Hotkeys, TriggerKey, __MISSING__
+groupMap := {}
+doublePressMap := {}
+lastPressTime := {}
+DblClickTime := 400
+hotkeyList := ""
 
-if (triggerKey != "__MISSING__" && triggerKey != "") {
-    singleClickMap := {}
-    dblClickMap := {}
-    lastPressTime := {}
-    pendingSingleLetter := ""
-    DblClickTime := 300
-    letters := ""
-
-    IniRead, hotkeysSection, %iniPath%, Hotkeys
-
-    if (hotkeysSection != "ERROR") {
-        Loop, Parse, hotkeysSection, `n, `r
-        {
-            if (A_LoopField == "")
-                continue
-
-            StringSplit, kv, A_LoopField, =
-            keyName := Trim(kv1)
-            groupName := Trim(kv2)
-
-            if (keyName == "TriggerKey" || groupName == "")
-                continue
-
-            if (InStr(keyName, "_Double")) {
-                baseLetter := StrReplace(keyName, "_Double")
-                dblClickMap[baseLetter] := groupName
-                if (!InStr(letters, baseLetter))
-                    letters .= baseLetter
+Loop, 10
+{
+    groupKey := "Group_" . A_Index
+    IniRead, groupName, %iniPath%, Groups, %groupKey%
+    if (groupName != "" && groupName != "ERROR") {
+        IniRead, hk, %iniPath%, Hotkeys, %groupKey%
+        if (hk != "" && hk != "ERROR") {
+            len := StrLen(hk)
+            lastChar := SubStr(hk, len, 1)
+            prevChar := SubStr(hk, len - 1, 1)
+            if (len >= 2 && lastChar = prevChar) {
+                baseHk := SubStr(hk, 1, len - 1)
+                doublePressMap[baseHk] := groupName
+                Hotkey, %baseHk%, HandleDoublePress
+                hotkeyList .= hk . "|"
             } else {
-                singleClickMap[keyName] := groupName
-                if (!InStr(letters, keyName))
-                    letters .= keyName
+                groupMap[hk] := groupName
+                Hotkey, %hk%, HandleGroupHotkey
+                hotkeyList .= hk . "|"
             }
         }
+    }
+}
 
-        Loop, Parse, letters
-        {
-            hk := triggerKey . A_LoopField
-            Hotkey, %hk%, HandleTrigger
-        }
-
-        trayTipText .= "`n[Prefix: " . triggerKey . "]"
-        Loop, Parse, letters
-        {
-            letter := A_LoopField
-            if (singleClickMap.HasKey(letter)) {
-                tip := triggerKey . letter
-                if (dblClickMap.HasKey(letter))
-                    tip .= " (x1)"
-                trayTipText .= "`n" . tip . " = " . singleClickMap[letter]
-            }
-            if (dblClickMap.HasKey(letter)) {
-                trayTipText .= "`n" . triggerKey . letter . letter . " (x2) = " . dblClickMap[letter]
-            }
-        }
+if (hotkeyList != "") {
+    trayTipText .= "`n"
+    Loop, Parse, hotkeyList, |
+    {
+        if (A_LoopField != "")
+            trayTipText .= "`n" . A_LoopField . " = " . (groupMap.HasKey(A_LoopField) ? groupMap[A_LoopField] : doublePressMap[SubStr(A_LoopField, 1, StrLen(A_LoopField)-1)])
     }
 }
 
@@ -111,20 +90,7 @@ ToggleStartup:
             Menu, Tray, Check, Start with Windows
     }
 return
-SuspendHotkeys:
-    Suspend, Toggle
-    if (A_IsSuspended)
-        Menu, Tray, Check, Suspend Hotkeys
-    else
-        Menu, Tray, Uncheck, Suspend Hotkeys
-return
-PauseScript:
-    Pause, Toggle
-    if (A_IsPaused)
-        Menu, Tray, Check, Pause Script
-    else
-        Menu, Tray, Uncheck, Pause Script
-return
+
 EditConfig:
     Run, edit "%iniPath%"
 return
@@ -142,36 +108,24 @@ ExitScript:
     ExitApp
 return
 
-HandleTrigger:
-    global triggerKey, DblClickTime, lastPressTime, pendingSingleLetter
-    global singleClickMap, dblClickMap
-
-    letter := SubStr(A_ThisHotkey, StrLen(triggerKey) + 1)
-
-    if (dblClickMap.HasKey(letter)) {
-        currentTime := A_TickCount
-        if (currentTime - lastPressTime[letter] < DblClickTime) {
-            lastPressTime[letter] := 0
-            SetTimer, ExecutePendingSingle, Off
-            ExecuteSearch(dblClickMap[letter])
-        } else {
-            lastPressTime[letter] := currentTime
-            pendingSingleLetter := letter
-            SetTimer, ExecutePendingSingle, % -DblClickTime
-        }
-    } else {
-        if (singleClickMap.HasKey(letter)) {
-            ExecuteSearch(singleClickMap[letter])
-        }
-    }
+HandleGroupHotkey:
+    global groupMap
+    hk := A_ThisHotkey
+    if (groupMap.HasKey(hk))
+        ExecuteSearch(groupMap[hk])
 return
 
-ExecutePendingSingle:
-    global pendingSingleLetter, singleClickMap
-    if (pendingSingleLetter != "" && singleClickMap.HasKey(pendingSingleLetter)) {
-        ExecuteSearch(singleClickMap[pendingSingleLetter])
+HandleDoublePress:
+    global doublePressMap, lastPressTime, DblClickTime
+    hk := A_ThisHotkey
+    currentTime := A_TickCount
+    if (lastPressTime.HasKey(hk) && currentTime - lastPressTime[hk] < DblClickTime) {
+        lastPressTime[hk] := 0
+        if (doublePressMap.HasKey(hk))
+            ExecuteSearch(doublePressMap[hk])
+    } else {
+        lastPressTime[hk] := currentTime
     }
-    pendingSingleLetter := ""
 return
 
 ExecuteSearch(groupName) {
