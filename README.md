@@ -14,5 +14,4 @@ The icon is from [SimpleKeys](https://beamedeighth.itch.io/simplekeys-animated-p
 
 1. Go to: GoldenDict → Preferences → Hotkeys
 2. Enable: "Use the following hotkey to translate a word from clipboard"
-3. Set the hotkey to: `Ctrl+Alt+Shift+F12` (This combo is unlikely to conflict with other apps.)
-4. Keep this option enabled; otherwise the pop‑up window won't look up words.
+3. Keep this option enabled; otherwise the pop‑up window won't look up words
