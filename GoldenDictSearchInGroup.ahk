@@ -16,6 +16,10 @@ IniRead, gdExecutable, %iniPath%, GoldenDict, Executable, goldendict
 IniRead, clipboardHotkeyEnabled, %iniPath%, GoldenDict, ClipboardHotkeyEnabled, off
 clipboardHotkeyEnabled := (clipboardHotkeyEnabled = "on" || clipboardHotkeyEnabled = "1" || clipboardHotkeyEnabled = "true")
 IniRead, noSelectionMsg, %iniPath%, Messages, NoSelectionMsg, No text copied. Please select the word to query first.
+EnvGet, envEditor, EDITOR
+IniRead, scriptEditor, %iniPath%, AutoHotkey, ScriptEditor, __MISSING__
+if (scriptEditor = "__MISSING__" || scriptEditor = "")
+    scriptEditor := envEditor != "" ? envEditor : "notepad"
 
 trayTipText := "GoldenDict Search"
 trayTipText .= "`nGroups and hotkeys"
@@ -122,7 +126,8 @@ ToggleStartup:
 return
 
 EditConfig:
-    Run, edit "%iniPath%"
+    global scriptEditor, iniPath
+    Run, %scriptEditor% "%iniPath%"
 return
 
 ReloadApp:
