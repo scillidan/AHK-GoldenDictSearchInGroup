@@ -13,13 +13,15 @@ if (!FileExist(iniPath)) {
 }
 
 IniRead, gdExecutable, %iniPath%, GoldenDict, Executable, goldendict
-IniRead, defaultWindowMode, %iniPath%, GoldenDict, DefaultWindowMode, popup
+IniRead, scanPopupEnabled, %iniPath%, GoldenDict, ScanPopupEnabled, off
+scanPopupEnabled := (scanPopupEnabled = "on" || scanPopupEnabled = "1" || scanPopupEnabled = "true")
 IniRead, noSelectionMsg, %iniPath%, Messages, NoSelectionMsg, No text copied. Please select the word to query first.
 
 trayTipText := "GoldenDict Search"
 
 groupMap := {}
 doublePressMap := {}
+groupNameMap := {}
 lastPressTime := {}
 DblClickTime := 400
 hotkeyList := ""
@@ -29,6 +31,7 @@ Loop, 10
     groupKey := "Group_" . A_Index
     IniRead, groupName, %iniPath%, Groups, %groupKey%
     if (groupName != "" && groupName != "ERROR") {
+        groupNameMap[groupKey] := groupName
         IniRead, hk, %iniPath%, Hotkeys, %groupKey%
         if (hk != "" && hk != "ERROR") {
             len := StrLen(hk)
@@ -36,11 +39,11 @@ Loop, 10
             prevChar := SubStr(hk, len - 1, 1)
             if (len >= 2 && lastChar = prevChar) {
                 baseHk := SubStr(hk, 1, len - 1)
-                doublePressMap[baseHk] := groupName
+                doublePressMap[baseHk] := groupKey
                 Hotkey, %baseHk%, HandleDoublePress
                 hotkeyList .= hk . "|"
             } else {
-                groupMap[hk] := groupName
+                groupMap[hk] := groupKey
                 Hotkey, %hk%, HandleGroupHotkey
                 hotkeyList .= hk . "|"
             }
@@ -52,8 +55,10 @@ if (hotkeyList != "") {
     trayTipText .= "`n"
     Loop, Parse, hotkeyList, |
     {
-        if (A_LoopField != "")
-            trayTipText .= "`n" . A_LoopField . " = " . (groupMap.HasKey(A_LoopField) ? groupMap[A_LoopField] : doublePressMap[SubStr(A_LoopField, 1, StrLen(A_LoopField)-1)])
+        if (A_LoopField != "") {
+            resolvedKey := groupMap.HasKey(A_LoopField) ? groupMap[A_LoopField] : doublePressMap[SubStr(A_LoopField, 1, StrLen(A_LoopField)-1)]
+            trayTipText .= "`n" . A_LoopField . " = " . (groupNameMap.HasKey(resolvedKey) ? groupNameMap[resolvedKey] : resolvedKey)
+        }
     }
 }
 
@@ -128,19 +133,19 @@ HandleDoublePress:
     }
 return
 
-ExecuteSearch(groupName) {
-    global iniPath, defaultWindowMode
-    IniRead, wMode, %iniPath%, WindowModes, %groupName%, %defaultWindowMode%
-    SearchInGoldenDict(groupName, wMode)
+ExecuteSearch(groupKey) {
+    global groupNameMap
+    groupName := groupNameMap.HasKey(groupKey) ? groupNameMap[groupKey] : groupKey
+    SearchInGoldenDict(groupName)
 }
 
-SearchInGoldenDict(groupName, windowMode) {
-    global gdExecutable, noSelectionMsg
+SearchInGoldenDict(groupName) {
+    global gdExecutable, noSelectionMsg, scanPopupEnabled
     oldClipboard := ClipboardAll
     query := Trim(Clipboard)
 
     if (query != "") {
-        groupParam := (windowMode = "main") ? "--group-name" : "--popup-group-name"
+        groupParam := scanPopupEnabled ? "--popup-group-name" : "--group-name"
         Run, "%gdExecutable%" %groupParam%="%groupName%" "%query%"
     } else {
         MsgBox, %noSelectionMsg%
