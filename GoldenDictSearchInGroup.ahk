@@ -13,8 +13,8 @@ if (!FileExist(iniPath)) {
 }
 
 IniRead, gdExecutable, %iniPath%, GoldenDict, Executable, goldendict
-IniRead, scanPopupEnabled, %iniPath%, GoldenDict, ScanPopupEnabled, off
-scanPopupEnabled := (scanPopupEnabled = "on" || scanPopupEnabled = "1" || scanPopupEnabled = "true")
+IniRead, clipboardHotkeyEnabled, %iniPath%, GoldenDict, ClipboardHotkeyEnabled, off
+clipboardHotkeyEnabled := (clipboardHotkeyEnabled = "on" || clipboardHotkeyEnabled = "1" || clipboardHotkeyEnabled = "true")
 IniRead, noSelectionMsg, %iniPath%, Messages, NoSelectionMsg, No text copied. Please select the word to query first.
 
 trayTipText := "GoldenDict Search"
@@ -140,12 +140,12 @@ ExecuteSearch(groupKey) {
 }
 
 SearchInGoldenDict(groupName) {
-    global gdExecutable, noSelectionMsg, scanPopupEnabled
+    global gdExecutable, noSelectionMsg, clipboardHotkeyEnabled
     oldClipboard := ClipboardAll
     query := Trim(Clipboard)
 
     if (query != "") {
-        groupParam := scanPopupEnabled ? "--popup-group-name" : "--group-name"
+        groupParam := clipboardHotkeyEnabled ? "--popup-group-name" : "--group-name"
         Run, "%gdExecutable%" %groupParam%="%groupName%" "%query%"
     } else {
         MsgBox, %noSelectionMsg%

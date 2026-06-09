@@ -14,6 +14,6 @@ The icon is from [SimpleKeys](https://beamedeighth.itch.io/simplekeys-animated-p
 
 1. Go to: GoldenDict → Preferences → Hotkeys
 2. Toggle: "Use the following hotkey to translate a word from clipboard"
-   - **Enabled**: CLI searches open in popup windows. Set `ScanPopupEnabled=on` in INI.
-   - **Disabled**: CLI searches open in the main window. Set `ScanPopupEnabled=off` in INI (default).
+   - **Enabled**: CLI searches open in popup windows. Set `ClipboardHotkeyEnabled=on` in INI.
+   - **Disabled**: CLI searches open in the main window. Set `ClipboardHotkeyEnabled=off` in INI (default).
 3. Configure dictionary groups and hotkeys in `GoldenDictSearchInGroup.ini`.
