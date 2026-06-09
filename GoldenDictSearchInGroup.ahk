@@ -78,10 +78,10 @@ Menu, Tray, NoStandard
 Menu, Tray, DeleteAll
 if (clipboardHotkeyEnabled) {
     Menu, Tray, Add, Clipboard Hotkey (Popup Search): On, ToggleClipboardHotkey
-    Menu, Tray, Check, Clipboard Hotkey (Popup Search): On
 } else {
     Menu, Tray, Add, Clipboard Hotkey (Popup Search): Off, ToggleClipboardHotkey
 }
+Menu, Tray, Add
 if (isStartup) {
     Menu, Tray, Add, Start with Windows, ToggleStartup
     Menu, Tray, Check, Start with Windows
@@ -104,10 +104,8 @@ ToggleClipboardHotkey:
     IniWrite, %newVal%, %iniPath%, GoldenDict, ClipboardHotkeyEnabled
     if (clipboardHotkeyEnabled) {
         Menu, Tray, Rename, Clipboard Hotkey (Popup Search): Off, Clipboard Hotkey (Popup Search): On
-        Menu, Tray, Check, Clipboard Hotkey (Popup Search): On
     } else {
         Menu, Tray, Rename, Clipboard Hotkey (Popup Search): On, Clipboard Hotkey (Popup Search): Off
-        Menu, Tray, Uncheck, Clipboard Hotkey (Popup Search): Off
     }
     GoSub, UpdateTrayTip
 return
