@@ -18,10 +18,12 @@ clipboardHotkeyEnabled := (clipboardHotkeyEnabled = "on" || clipboardHotkeyEnabl
 IniRead, noSelectionMsg, %iniPath%, Messages, NoSelectionMsg, No text copied. Please select the word to query first.
 
 trayTipText := "GoldenDict Search"
+trayTipText .= "`nGroups and hotkeys"
 
 groupMap := {}
 doublePressMap := {}
 groupNameMap := {}
+hotkeyToGroupKey := {}
 lastPressTime := {}
 DblClickTime := 400
 hotkeyList := ""
@@ -40,10 +42,12 @@ Loop, 10
             if (len >= 2 && lastChar = prevChar) {
                 baseHk := SubStr(hk, 1, len - 1)
                 doublePressMap[baseHk] := groupKey
+                hotkeyToGroupKey[hk] := groupKey
                 Hotkey, %baseHk%, HandleDoublePress
                 hotkeyList .= hk . "|"
             } else {
                 groupMap[hk] := groupKey
+                hotkeyToGroupKey[hk] := groupKey
                 Hotkey, %hk%, HandleGroupHotkey
                 hotkeyList .= hk . "|"
             }
@@ -52,12 +56,12 @@ Loop, 10
 }
 
 if (hotkeyList != "") {
-    trayTipText .= "`n"
     Loop, Parse, hotkeyList, |
     {
         if (A_LoopField != "") {
-            resolvedKey := groupMap.HasKey(A_LoopField) ? groupMap[A_LoopField] : doublePressMap[SubStr(A_LoopField, 1, StrLen(A_LoopField)-1)]
-            trayTipText .= "`n" . A_LoopField . " = " . (groupNameMap.HasKey(resolvedKey) ? groupNameMap[resolvedKey] : resolvedKey)
+            gk := hotkeyToGroupKey[A_LoopField]
+            gn := groupNameMap.HasKey(gk) ? groupNameMap[gk] : gk
+            trayTipText .= "`n  " . gn . " = " . A_LoopField
         }
     }
 }
@@ -68,6 +72,12 @@ isStartup := FileExist(shortcutPath)
 
 Menu, Tray, NoStandard
 Menu, Tray, DeleteAll
+if (clipboardHotkeyEnabled) {
+    Menu, Tray, Add, Clipboard Hotkey (Popup Search): On, ToggleClipboardHotkey
+    Menu, Tray, Check, Clipboard Hotkey (Popup Search): On
+} else {
+    Menu, Tray, Add, Clipboard Hotkey (Popup Search): Off, ToggleClipboardHotkey
+}
 if (isStartup) {
     Menu, Tray, Add, Start with Windows, ToggleStartup
     Menu, Tray, Check, Start with Windows
@@ -81,6 +91,21 @@ Menu, Tray, Tip, %trayTipText%
 
 if (FileExist(trayIcon))
     Menu, Tray, Icon, %trayIcon%
+return
+
+ToggleClipboardHotkey:
+    global clipboardHotkeyEnabled, iniPath
+    clipboardHotkeyEnabled := !clipboardHotkeyEnabled
+    newVal := clipboardHotkeyEnabled ? "on" : "off"
+    IniWrite, %newVal%, %iniPath%, GoldenDict, ClipboardHotkeyEnabled
+    if (clipboardHotkeyEnabled) {
+        Menu, Tray, Rename, Clipboard Hotkey (Popup Search): Off, Clipboard Hotkey (Popup Search): On
+        Menu, Tray, Check, Clipboard Hotkey (Popup Search): On
+    } else {
+        Menu, Tray, Rename, Clipboard Hotkey (Popup Search): On, Clipboard Hotkey (Popup Search): Off
+        Menu, Tray, Uncheck, Clipboard Hotkey (Popup Search): Off
+    }
+    GoSub, UpdateTrayTip
 return
 
 ToggleStartup:
@@ -107,6 +132,28 @@ return
 
 DoReload:
     Reload
+return
+
+UpdateTrayTip:
+    global clipboardHotkeyEnabled, trayTipText
+    tip := "GoldenDict Search"
+    tip .= "`nGroups and hotkeys"
+    Loop, 10
+    {
+        gk := "Group_" . A_Index
+        if (groupNameMap.HasKey(gk)) {
+            gn := groupNameMap[gk]
+            Loop, Parse, hotkeyList, |
+            {
+                if (A_LoopField != "" && hotkeyToGroupKey[A_LoopField] = gk) {
+                    tip .= "`n  " . gn . " = " . A_LoopField
+                    break
+                }
+            }
+        }
+    }
+    trayTipText := tip
+    Menu, Tray, Tip, %tip%
 return
 
 ExitScript:
