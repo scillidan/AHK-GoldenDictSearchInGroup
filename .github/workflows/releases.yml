@@ -20,7 +20,9 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v6
+        with:
+          persist-credentials: false
 
       - name: Install 7zip
         run: |
@@ -42,12 +44,14 @@ jobs:
         run: 7z a -tzip GoldenDictSearchInGroup.zip GoldenDictSearchInGroup.exe GoldenDictSearchInGroup.ini assets/icon.ico LICENSE
 
       - name: Generate SHA256 checksums
-        run: sha256sum GoldenDictSearchInGroup.zip > GoldenDictSearchInGroup.exe.sha256
+        run: sha256sum GoldenDictSearchInGroup.zip > GoldenDictSearchInGroup.zip.sha256
 
       - name: Release
-        uses: softprops/action-gh-release@v3
-        with:
-          tag_name: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref_name }}
-          name: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref_name }}
-          files: |
-            GoldenDictSearchInGroup.zip
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref_name }}" \
+            GoldenDictSearchInGroup.zip \
+            GoldenDictSearchInGroup.zip.sha256 \
+            --title "${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref_name }}" \
+            --generate-notes
