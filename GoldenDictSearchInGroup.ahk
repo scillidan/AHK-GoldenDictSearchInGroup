@@ -1,7 +1,4 @@
-#NoEnv
 #SingleInstance, Force
-SendMode Input
-SetWorkingDir %A_ScriptDir%
 
 scriptDir := A_ScriptDir
 iniPath := scriptDir . "\GoldenDictSearchInGroup.ini"
