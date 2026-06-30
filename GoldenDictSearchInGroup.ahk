@@ -139,7 +139,7 @@ return
 
 UpdateTrayTip:
     global clipboardHotkeyEnabled, trayTipText
-    tip := "GoldenDict Search"
+    tip := "GoldenDict Search in Group"
     tip .= "`nGroups and hotkeys"
     Loop, 10
     {
